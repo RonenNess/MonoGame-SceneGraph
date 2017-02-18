@@ -105,6 +105,12 @@ namespace MonoGameSceneGraph
         public Node Parent { get { return _parent; } }
 
         /// <summary>
+        /// Transformation version is a special identifier that changes whenever the world transformations
+        /// of this node changes. Its not necessarily a sequence, but if you check this number for changes every
+        /// frame its a good indication of transformation change.
+        /// </summary>
+
+        /// <summary>
         /// Draw the node and its children.
         /// </summary>
         public virtual void Draw()
