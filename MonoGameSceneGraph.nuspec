@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
   <metadata>
 	<id>MonoGame.SceneGraph</id>
-	<version>1.0.0.0</version>
+	<version>1.0.0.1</version>
 	<authors>Ronen Ness</authors>
 	<owners>RonenNess</owners>
 	<licenseUrl>https://en.wikipedia.org/wiki/MIT_License</licenseUrl>

@@ -2,7 +2,7 @@
 Simple Nodes &amp; Entities for scene graphs in MonoGame.
 
 ## What is it
-This mini-lib implements basic node and transformations to allow easy implementation of scene graphs.
+This mini-lib implements basic node and transformations required to implement a scene graphs in MonoGame.
 
 ### But what's a scene graph?
 
@@ -172,3 +172,11 @@ In this doc we didn't cover much of the API, only the very basics needed to get 
 
 ## Lisence
 MonoGame-SceneGraph is distributed with the permissive MIT License. For more info, check out the ```LICENSE``` file in this repo.
+
+## Changelog
+
+### 1.0.0.1
+
+- Added ```Find()``` to Nodes.
+- Made some functions virtual to make Node more easily extendable.
+- Fixed a bug when parent of a parent change transformations but middle parent don't.
