@@ -164,9 +164,8 @@ namespace MonoGameSceneGraph
             // add node to children list
             _childNodes.Add(node);
 
-            // set self as node's parent, and make sure it will update world transformations next draw call
-            node._parent = this;
-            node._parentLastTransformVersion = _transformVersion - 1;
+            // set self as node's parent
+            node.SetParent(this);
         }
 
         /// <summary>
@@ -184,9 +183,39 @@ namespace MonoGameSceneGraph
             // remove node from children list
             _childNodes.Remove(node);
 
-            // clear node parent pointer and set parent transformations to 1, to make sure it will recalc world transform next draw
-            node._parent = null;
-            node._parentLastTransformVersion = 1;
+            // clear node parent
+            node.SetParent(null);
+        }
+
+        /// <summary>
+        /// Find and return first child node by identifier.
+        /// </summary>
+        /// <param name="identifier">Node identifier to search for.</param>
+        /// <param name="searchInChildren">If true, will also search recurisvely in children.</param>
+        /// <returns>Node with given identifier or null if not found.</returns>
+        public Node FindChildNode(string identifier, bool searchInChildren = true)
+        {
+            foreach (Node node in _childNodes)
+            {
+                // search in direct children
+                if (node.Identifier == identifier)
+                {
+                    return node;
+                }
+
+                // recursive search
+                if (searchInChildren)
+                {
+                    Node foundInChild = node.FindChildNode(identifier, searchInChildren);
+                    if (foundInChild != null)
+                    {
+                        return foundInChild;
+                    }
+                }
+            }
+
+            // if got here it means we didn't find any child node with given identifier
+            return null;
         }
 
         /// <summary>
@@ -207,25 +236,37 @@ namespace MonoGameSceneGraph
         /// <summary>
         /// Set this node as "dirty", eg that we need to update local transformations.
         /// </summary>
-        protected void OnWorldMatrixChange()
+        protected virtual void OnWorldMatrixChange()
         {
             _isDirty = true;
+        }
+
+        /// <summary>
+        /// Set the parent of this node.
+        /// </summary>
+        /// <param name="newParent">New parent node to set, or null for no parent.</param>
+        protected virtual void SetParent(Node newParent)
+        {
+            // set parent
+            _parent = newParent;
+
+            // set our parents last transformations version to make sure we'll update world transformations next frame.
+            _parentLastTransformVersion = newParent != null ? newParent._transformVersion - 1 : 1;
         }
 
         /// <summary>
         /// Calc final transformations for current frame.
         /// This uses an indicator to know if an update is needed, so no harm is done if you call it multiple times.
         /// </summary>
-        protected void UpdateTransformations()
+        protected virtual void UpdateTransformations()
         {
             // if local transformations are dirty, we need to update them
             if (_isDirty)
             {
                 _localTransform = _transformations.BuildMatrix(_transformationsOrder, _rotationOrder);
-                _transformVersion++;
             }
             
-            // if local transformations are dirty, or parent transformations are out-of-date, update global transformations
+            // if local transformations are dirty, or parent transformations are out-of-date, update world transformations
             if (_isDirty || 
                 (_parent != null && _parentLastTransformVersion != _parent._transformVersion) |
                 (_parent == null && _parentLastTransformVersion != 0))
@@ -242,6 +283,9 @@ namespace MonoGameSceneGraph
                     _worldTransform = _localTransform;
                     _parentLastTransformVersion = 0;
                 }
+
+                // increase transformation version
+                _transformVersion++;
             }
 
             // no longer dirty
