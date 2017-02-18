@@ -109,6 +109,7 @@ namespace MonoGameSceneGraph
         /// of this node changes. Its not necessarily a sequence, but if you check this number for changes every
         /// frame its a good indication of transformation change.
         /// </summary>
+        public uint TransformVersion { get { return _transformVersion; } }
 
         /// <summary>
         /// Draw the node and its children.
