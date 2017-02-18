@@ -64,6 +64,12 @@ namespace MonoGameSceneGraph
             nodeContainerContainer.AddChildNode(nodeContainer);
             nodeContainer.AddChildNode(node);
 
+            // for debug
+            root.Identifier = "root";
+            nodeContainerContainer.Identifier = "ncc";
+            nodeContainer.Identifier = "nc";
+            node.Identifier = "n";
+
             // create entity and attach to bottom node
             entity = new ModelEntity(Content.Load<Model>("robot"));
             node.AddEntity(entity);
