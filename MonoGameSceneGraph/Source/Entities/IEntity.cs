@@ -9,8 +9,6 @@
 //-----------------------------------------------------------------------------
 #endregion
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using System.Collections.Generic;
 
 
 namespace MonoGameSceneGraph
@@ -27,5 +25,14 @@ namespace MonoGameSceneGraph
         /// <param name="localTransformations">Local transformations from the direct parent node.</param>
         /// <param name="worldTransformations">World transformations to apply on this entity (this is what you should use to draw this entity).</param>
         void Draw(Node parent, Matrix localTransformations, Matrix worldTransformations);
+
+        /// <summary>
+        /// Get the bounding box of this entity.
+        /// </summary>
+        /// <param name="parent">Parent node that's currently drawing this entity.</param>
+        /// <param name="localTransformations">Local transformations from the direct parent node.</param>
+        /// <param name="worldTransformations">World transformations to apply on this entity (this is what you should use to draw this entity).</param>
+        /// <returns>Bounding box of the entity.</returns>
+        BoundingBox GetBoundingBox(Node parent, Matrix localTransformations, Matrix worldTransformations);
     }
 }

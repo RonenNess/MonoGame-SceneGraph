@@ -13,6 +13,14 @@ using Microsoft.Xna.Framework.Graphics;
 namespace MonoGameSceneGraph
 {
     /// <summary>
+    /// MonoGameSceneGraph is the main namespace that contains all the MonoGame-SceneGraph entities.
+    /// </summary>
+    [System.Runtime.CompilerServices.CompilerGenerated]
+    class NamespaceDoc
+    {
+    }
+
+    /// <summary>
     /// Different way to build matrix from transformations.
     /// </summary>
     public enum TransformOrder

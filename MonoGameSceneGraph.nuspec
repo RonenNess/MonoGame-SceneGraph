@@ -17,6 +17,6 @@
   </metadata>
   <files>
 	<file src="readme.txt" target="" />
-	<file src="MonoGameSceneGraph\bin\DesktopGL\x86\Release\MonoGameSceneGraph.dll" target="lib\ronenness\MonoGameSceneGraph.dll"/>
+	<file src="MonoGameSceneGraph\bin\DesktopGL\x86\Release\MonoGameSceneGraph.dll" target="lib\MonoGameSceneGraph.dll"/>
   </files>
 </package>

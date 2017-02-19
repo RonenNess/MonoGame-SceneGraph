@@ -110,5 +110,53 @@ namespace MonoGameSceneGraph
                 mesh.Draw();
             }
         }
+
+        /// <summary>
+        /// Get the bounding box of this entity.
+        /// </summary>
+        /// <param name="parent">Parent node that's currently drawing this entity.</param>
+        /// <param name="localTransformations">Local transformations from the direct parent node.</param>
+        /// <param name="worldTransformations">World transformations to apply on this entity (this is what you should use to draw this entity).</param>
+        /// <returns>Bounding box of the entity.</returns>
+        public BoundingBox GetBoundingBox(Node parent, Matrix localTransformations, Matrix worldTransformations)
+        {
+            // apply model transformations on world transform (note: don't support animations)
+            worldTransformations = worldTransformations * Model.Bones[0].Transform;
+
+            // initialize minimum and maximum corners of the bounding box to max and min values
+            Vector3 min = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
+            Vector3 max = new Vector3(float.MinValue, float.MinValue, float.MinValue);
+
+            // iterate over mesh parts
+            foreach (ModelMesh mesh in Model.Meshes)
+            {
+                foreach (ModelMeshPart meshPart in mesh.MeshParts)
+                {
+                    // vertex buffer parameters
+                    int vertexStride = meshPart.VertexBuffer.VertexDeclaration.VertexStride;
+                    int vertexBufferSize = meshPart.NumVertices * vertexStride;
+
+                    // get vertex data as float
+                    float[] vertexData = new float[vertexBufferSize / sizeof(float)];
+                    meshPart.VertexBuffer.GetData<float>(vertexData);
+
+                    // iterate through vertices (possibly) growing bounding box
+                    for (int i = 0; i < vertexBufferSize / sizeof(float); i += vertexStride / sizeof(float))
+                    {
+                        // get curr position and update min / max
+                        Vector3 currPosition = new Vector3(vertexData[i], vertexData[i + 1], vertexData[i + 2]);
+                        min = Vector3.Min(min, currPosition);
+                        max = Vector3.Max(max, currPosition);
+                    }
+                }
+            }
+
+            // transform min and max position so it will be in world space
+            min = Vector3.Transform(min, worldTransformations);
+            max = Vector3.Transform(max, worldTransformations);
+
+            // return the bounding box
+            return new BoundingBox(min, max);
+        }
     }
 }

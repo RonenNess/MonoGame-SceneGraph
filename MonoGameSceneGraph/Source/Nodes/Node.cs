@@ -14,14 +14,6 @@ using System.Collections.Generic;
 namespace MonoGameSceneGraph
 {
     /// <summary>
-    /// MonoGameSceneGraph is the main namespace that contains all the MonoGame-SceneGraph entities.
-    /// </summary>
-    [System.Runtime.CompilerServices.CompilerGenerated]
-    class NamespaceDoc
-    {
-    }
-
-    /// <summary>
     /// A node with transformations, you can attach renderable entities to it, or append
     /// child nodes to inherit transformations.
     /// </summary>
@@ -241,9 +233,18 @@ namespace MonoGameSceneGraph
         }
 
         /// <summary>
-        /// Set this node as "dirty", eg that we need to update local transformations.
+        /// Called when the world matrix of this node is actually recalculated (invoked after the calculation).
         /// </summary>
         protected virtual void OnWorldMatrixChange()
+        {
+            _transformVersion++;
+        }
+
+        /// <summary>
+        /// Called when local transformations are set, eg when Position, Rotation, Scale etc. is changed.
+        /// We use this to set this node as "dirty", eg that we need to update local transformations.
+        /// </summary>
+        protected virtual void OnTransformationsSet()
         {
             _isDirty = true;
         }
@@ -291,8 +292,8 @@ namespace MonoGameSceneGraph
                     _parentLastTransformVersion = 0;
                 }
 
-                // increase transformation version
-                _transformVersion++;
+                // called the function that mark world matrix change (increase transformation version etc)
+                OnWorldMatrixChange();
             }
 
             // no longer dirty
@@ -321,7 +322,7 @@ namespace MonoGameSceneGraph
         public void ResetTransformations()
         {
             _transformations = new Transformations();
-            OnWorldMatrixChange();
+            OnTransformationsSet();
         }
 
         /// <summary>
@@ -330,7 +331,7 @@ namespace MonoGameSceneGraph
         public TransformOrder TransformationsOrder
         {
             get { return _transformationsOrder; }
-            set { _transformationsOrder = value;  OnWorldMatrixChange(); }
+            set { _transformationsOrder = value;  OnTransformationsSet(); }
         }
 
         /// <summary>
@@ -339,7 +340,7 @@ namespace MonoGameSceneGraph
         public RotationOrder RotationOrder
         {
             get { return _rotationOrder; }
-            set { _rotationOrder = value; OnWorldMatrixChange(); }
+            set { _rotationOrder = value; OnTransformationsSet(); }
         }
 
         /// <summary>
@@ -348,7 +349,7 @@ namespace MonoGameSceneGraph
         public Vector3 Position
         {
             get { return _transformations.Position; }
-            set { _transformations.Position = value; OnWorldMatrixChange(); }
+            set { _transformations.Position = value; OnTransformationsSet(); }
         }
 
         /// <summary>
@@ -357,7 +358,7 @@ namespace MonoGameSceneGraph
         public Vector3 Scale
         {
             get { return _transformations.Scale; }
-            set { _transformations.Scale = value; OnWorldMatrixChange(); }
+            set { _transformations.Scale = value; OnTransformationsSet(); }
         }
 
         /// <summary>
@@ -366,7 +367,7 @@ namespace MonoGameSceneGraph
         public Vector3 Rotation
         {
             get { return _transformations.Rotation; }
-            set { _transformations.Rotation = value; OnWorldMatrixChange(); }
+            set { _transformations.Rotation = value; OnTransformationsSet(); }
         }
 
         /// <summary>
@@ -375,7 +376,7 @@ namespace MonoGameSceneGraph
         public float RotationX
         {
             get { return _transformations.Rotation.X; }
-            set { _transformations.Rotation.X = value; OnWorldMatrixChange(); }
+            set { _transformations.Rotation.X = value; OnTransformationsSet(); }
         }
 
         /// <summary>
@@ -384,7 +385,7 @@ namespace MonoGameSceneGraph
         public float RotationY
         {
             get { return _transformations.Rotation.Y; }
-            set { _transformations.Rotation.Y = value; OnWorldMatrixChange(); }
+            set { _transformations.Rotation.Y = value; OnTransformationsSet(); }
         }
 
         /// <summary>
@@ -393,7 +394,7 @@ namespace MonoGameSceneGraph
         public float RotationZ
         {
             get { return _transformations.Rotation.Z; }
-            set { _transformations.Rotation.Z = value; OnWorldMatrixChange(); }
+            set { _transformations.Rotation.Z = value; OnTransformationsSet(); }
         }
 
         /// <summary>
@@ -402,7 +403,7 @@ namespace MonoGameSceneGraph
         public float ScaleX
         {
             get { return _transformations.Scale.X; }
-            set { _transformations.Scale.X = value; OnWorldMatrixChange(); }
+            set { _transformations.Scale.X = value; OnTransformationsSet(); }
         }
 
         /// <summary>
@@ -411,7 +412,7 @@ namespace MonoGameSceneGraph
         public float ScaleY
         {
             get { return _transformations.Scale.Y; }
-            set { _transformations.Scale.Y = value; OnWorldMatrixChange(); }
+            set { _transformations.Scale.Y = value; OnTransformationsSet(); }
         }
 
         /// <summary>
@@ -420,7 +421,7 @@ namespace MonoGameSceneGraph
         public float ScaleZ
         {
             get { return _transformations.Scale.Z; }
-            set { _transformations.Scale.Z = value; OnWorldMatrixChange(); }
+            set { _transformations.Scale.Z = value; OnTransformationsSet(); }
         }
 
 
@@ -430,7 +431,7 @@ namespace MonoGameSceneGraph
         public float PositionX
         {
             get { return _transformations.Position.X; }
-            set { _transformations.Position.X = value; OnWorldMatrixChange(); }
+            set { _transformations.Position.X = value; OnTransformationsSet(); }
         }
 
         /// <summary>
@@ -439,7 +440,7 @@ namespace MonoGameSceneGraph
         public float PositionY
         {
             get { return _transformations.Position.Y; }
-            set { _transformations.Position.Y = value; OnWorldMatrixChange(); }
+            set { _transformations.Position.Y = value; OnTransformationsSet(); }
         }
 
         /// <summary>
@@ -448,7 +449,7 @@ namespace MonoGameSceneGraph
         public float PositionZ
         {
             get { return _transformations.Position.Z; }
-            set { _transformations.Position.Z = value; OnWorldMatrixChange(); }
+            set { _transformations.Position.Z = value; OnTransformationsSet(); }
         }
 
         /// <summary>
@@ -458,7 +459,41 @@ namespace MonoGameSceneGraph
         public void Translate(Vector3 moveBy)
         {
             _transformations.Position += moveBy;
-            OnWorldMatrixChange();
+            OnTransformationsSet();
+        }
+
+        /// <summary>
+        /// Get bounding box of this node and all its child nodes.
+        /// </summary>
+        /// <param name="includeChildNodes">If true, will include bounding box of child nodes. If false, only of entities directly attached to this node.</param>
+        /// <returns>Bounding box of the node and its children.</returns>
+        public virtual BoundingBox GetBoundingBox(bool includeChildNodes = true)
+        {
+            // initialize minimum and maximum corners of the bounding box to max and min values
+            Vector3 min = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
+            Vector3 max = new Vector3(float.MinValue, float.MinValue, float.MinValue);
+
+            // apply all child nodes bounding boxes
+            if (includeChildNodes)
+            {
+                foreach (Node child in _childNodes)
+                {
+                    BoundingBox curr = child.GetBoundingBox();
+                    min = Vector3.Min(min, curr.Min);
+                    max = Vector3.Max(max, curr.Max);
+                }
+            }
+
+            // apply all entities directly under this node
+            foreach (IEntity entity in _childEntities)
+            {
+                BoundingBox curr = entity.GetBoundingBox(this, _localTransform, _worldTransform);
+                min = Vector3.Min(min, curr.Min);
+                max = Vector3.Max(max, curr.Max);
+            }
+
+            // return final bounding box
+            return new BoundingBox(min, max);
         }
     }
 }
