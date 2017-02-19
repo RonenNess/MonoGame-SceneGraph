@@ -166,7 +166,43 @@ if (currSpeed.Length() > 0)
 
 And now the ```player``` node will only calculate its matrix when really needed.
 
-#### Further Reading
+### Culling
+
+Culling objects that are outside the screen is an important optimization most games need.
+MonoGame-SceneGraph comes with a built-in CullingNode that implements simple culling based on camera frustum and bounding boxes.
+
+It works as follows:
+1. Every time the camera changes, the static member CameraFrustum must be updated. The Culling Node will use this frustum to detect weather or not its in screen.
+2. Whenever the transformations of this node update, it will also calculate the Bounding Box of itself with all its child nodes and entities.
+3. When the node is drawn, it will first test collision between its bounding box and the camera frustum. If its found to be out of screen, the node will not draw itself or its children.
+
+Use ```CullingNodes``` is just like using regular nodes, eg:
+
+```cs
+// create a culling node
+MonoGameSceneGraph.CullingNode cullNode = new MonoGameSceneGraph.CullingNode();
+```
+
+But in addition to creating and drawing them, you also need to set the camera bounding frustum whenever it updates:
+
+```cs
+// set the camera frustum for all culling nodes (its a static member)
+MonoGameSceneGraph.CullingNode.CameraFrustum = cameraFrustum;
+```
+
+Note that you can mix CullingNodes with regular Nodes without any problems. If you have internal parts that you don't want to check culling for, just make them plain Nodes. However, if you put them under a CullingNode and its culled out, they won't be rendered.
+
+#### Using CullingNodes Properly
+As mentioned above, a CullingNode bounding box is the combination of its own bounding box + all its children nodes and entities.
+This means that the bounding box of a parent CullingNode contains in it the bounding boxes of all its child nodes, and their children, and their children, and so forth..
+
+So its quite obvious that if you put a single CullingNode with lots of children scattered around the level the result would be a huge bounding box that will most likely always be in screen, and lots of small bounding boxes (per child) that needs to be checked every frame. This is far from optimal.
+
+In order to fully enjoy the benefits of CullingNodes you need to build your scene properly, eg divide it into smaller chunks and distribute child nodes by regions.
+The easiest example to explain this is a tilemap, made out of a grid of tiles; Instead of having one Node with *all* the tile nodes as its direct children, you should break the tilemap into smaller chunks (or smaller grids) so culling will occur on the chunk level before testing per-tile.
+
+
+### Further Reading
 
 In this doc we didn't cover much of the API, only the very basics needed to get you going. To learn more, please see the doc file in ```Help/Documentation.chm```, or check out the code documentation (mostly ```Node.cs```).
 

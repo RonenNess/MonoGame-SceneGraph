@@ -38,7 +38,7 @@ namespace MonoGameSceneGraph
         /// The camera frustum to cull by. You need to update this every time the camera frustum changes in order
         /// to make the culling work currectly.
         /// </summary>
-        public static BoundingFrustum CameraFrustum;
+        public static BoundingFrustum CameraFrustum = null;
 
         /// <summary>
         /// Last calculated bounding box for this node.
@@ -64,8 +64,15 @@ namespace MonoGameSceneGraph
         /// </summary>
         public override void Draw()
         {
-            // if not visible or camera frustum is not set, skip (eg don't draw it)
-            if (!IsVisible || CameraFrustum == null)
+            // if camera frustum is not defined, draw this node as a regular node
+            if (CameraFrustum == null)
+            {
+                base.Draw();
+                return;
+            }
+
+            // if not visible stop here so we won't calculate bounding boxes etc.
+            if (!IsVisible)
             {
                 return;
             }
