@@ -276,7 +276,7 @@ namespace MonoGameSceneGraph
             
             // if local transformations are dirty, or parent transformations are out-of-date, update world transformations
             if (_isDirty || 
-                (_parent != null && _parentLastTransformVersion != _parent._transformVersion) |
+                (_parent != null && _parentLastTransformVersion != _parent._transformVersion) ||
                 (_parent == null && _parentLastTransformVersion != 0))
             {
                 // if we got parent, apply its transformations
