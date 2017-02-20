@@ -64,6 +64,12 @@ namespace MonoGameSceneGraph
         /// </summary>
         public override void Draw()
         {
+            // if not visible skip
+            if (!IsVisible)
+            {
+                return;
+            }
+
             // if camera frustum is not defined, draw this node as a regular node
             if (CameraFrustum == null)
             {
@@ -71,11 +77,8 @@ namespace MonoGameSceneGraph
                 return;
             }
 
-            // if not visible stop here so we won't calculate bounding boxes etc.
-            if (!IsVisible)
-            {
-                return;
-            }
+            // update transformations (only if needed, testing logic is inside)
+            UpdateTransformations();
 
             // check if need to recalculate bounding box
             if (_isBoundingBoxDirty)
@@ -85,13 +88,24 @@ namespace MonoGameSceneGraph
             }
 
             // if this node is out of screen, don't draw it
-            if (!_currBoundingBox.Intersects(CameraFrustum))
+            if (CameraFrustum.Contains(_currBoundingBox) == ContainmentType.Disjoint)
             {
                 return;
             }
 
             // if got here it means this node is in screen and should be rendered. draw it.
-            base.Draw();
+
+            // draw all child nodes
+            foreach (Node node in _childNodes)
+            {
+                node.Draw();
+            }
+
+            // draw all child entities
+            foreach (IEntity entity in _childEntities)
+            {
+                entity.Draw(this, _localTransform, _worldTransform);
+            }
         }
     }
 }
