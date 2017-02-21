@@ -48,7 +48,7 @@ namespace MonoGameSceneGraph
         /// <summary>
         /// Do we need to update the bounding box?
         /// </summary>
-        private bool _isBoundingBoxDirty = true;
+        protected bool _isBoundingBoxDirty = true;
 
         /// <summary>
         /// Draw the node and its children.
@@ -56,7 +56,7 @@ namespace MonoGameSceneGraph
         public override void Draw()
         {
             // if not visible skip
-            if (!IsVisible)
+            if (!Visible)
             {
                 return;
             }
@@ -140,7 +140,7 @@ namespace MonoGameSceneGraph
         /// <summary>
         /// Update the bounding box of this Culling Node.
         /// </summary>
-        protected void UpdateBoundingBox()
+        protected virtual void UpdateBoundingBox()
         {
             // if bounding box is not dirty, skip
             if (!_isBoundingBoxDirty)

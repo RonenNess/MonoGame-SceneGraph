@@ -32,7 +32,7 @@ namespace MonoGameSceneGraph
         /// <summary>
         /// Is this node currently visible?
         /// </summary>
-        public bool IsVisible = true;
+        public virtual bool Visible { get; set; }
 
         /// <summary>
         /// Optional identifier we can give to nodes.
@@ -104,12 +104,20 @@ namespace MonoGameSceneGraph
         public uint TransformVersion { get { return _transformVersion; } }
 
         /// <summary>
+        /// Create the new node.
+        /// </summary>
+        public Node()
+        {
+            Visible = true;
+        }
+
+        /// <summary>
         /// Draw the node and its children.
         /// </summary>
         public virtual void Draw()
         {
             // not visible? skip
-            if (!IsVisible)
+            if (!Visible)
             {
                 return;
             }
@@ -487,31 +495,56 @@ namespace MonoGameSceneGraph
             // make sure transformations are up-to-date
             UpdateTransformations();
 
-            // initialize minimum and maximum corners of the bounding box to max and min values
-            Vector3 min = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
-            Vector3 max = new Vector3(float.MinValue, float.MinValue, float.MinValue);
+            // list of points to build bounding box from
+            List<Vector3> corners = new List<Vector3>();
 
             // apply all child nodes bounding boxes
             if (includeChildNodes)
             {
                 foreach (Node child in _childNodes)
                 {
-                    BoundingBox curr = child.GetBoundingBox();
-                    min = Vector3.Min(min, curr.Min);
-                    max = Vector3.Max(max, curr.Max);
+                    // skip invisible nodes
+                    if (!child.Visible)
+                    {
+                        continue;
+                    }
+
+                    // get bounding box
+                    BoundingBox currBox = child.GetBoundingBox();
+                    if (currBox.Min != currBox.Max)
+                    {
+                        corners.Add(currBox.Min);
+                        corners.Add(currBox.Max);
+                    }
                 }
             }
 
             // apply all entities directly under this node
             foreach (IEntity entity in _childEntities)
             {
-                BoundingBox curr = entity.GetBoundingBox(this, _localTransform, _worldTransform);
-                min = Vector3.Min(min, curr.Min);
-                max = Vector3.Max(max, curr.Max);
+                // skip invisible entities
+                if (!entity.Visible)
+                {
+                    continue;
+                }
+
+                // get entity bounding box
+                BoundingBox currBox = entity.GetBoundingBox(this, _localTransform, _worldTransform);
+                if (currBox.Min != currBox.Max)
+                {
+                    corners.Add(currBox.Min);
+                    corners.Add(currBox.Max);
+                }
+            }
+
+            // nothing in this node?
+            if (corners.Count == 0)
+            {
+                return new BoundingBox();
             }
 
             // return final bounding box
-            return new BoundingBox(min, max);
+            return BoundingBox.CreateFromPoints(corners);
         }
     }
 }

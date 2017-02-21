@@ -113,7 +113,7 @@ namespace MonoGameSceneGraph
 
             // rotate inner node on X axis
             node.RotationZ = node.RotationZ + 0.01f;
-
+            
             // scale node container
             nodeContainer.ScaleZ = (1.0f + (float)System.Math.Cos(gameTime.TotalGameTime.TotalSeconds * 2f) / 4f);
 

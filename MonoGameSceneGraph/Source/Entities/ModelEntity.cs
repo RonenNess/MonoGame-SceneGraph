@@ -46,6 +46,9 @@ namespace MonoGameSceneGraph
         /// <param name="model">Model to draw.</param>
         public ModelEntity(Model model)
         {
+            // visible by default
+            Visible = true;
+
             // store model
             Model = model;
 
@@ -72,16 +75,10 @@ namespace MonoGameSceneGraph
         /// <param name="worldTransformations">World transformations to apply on this entity (this is what you should use to draw this entity).</param>
         public void Draw(Node parent, Matrix localTransformations, Matrix worldTransformations)
         {
-            // A model is composed of "Meshes" which are
-            // parts of the model which can be positioned
-            // independently, which can use different textures,
-            // and which can have different rendering states
-            // such as lighting applied.
+            // iterate model meshes
             foreach (var mesh in Model.Meshes)
             {
-                // "Effect" refers to a shader. Each mesh may
-                // have multiple shaders applied to it for more
-                // advanced visuals. 
+                // iterate effect in mesh
                 foreach (BasicEffect effect in mesh.Effects)
                 {
                     // enable lights
@@ -105,10 +102,18 @@ namespace MonoGameSceneGraph
                     effect.Projection = Projection;
                 }
 
-                // Now that we've assigned our properties on the effects we can
-                // draw the entire mesh
+                // draw current mesh
                 mesh.Draw();
             }
+        }
+
+        /// <summary>
+        /// Return if the entity is currently visible.
+        /// </summary>
+        /// <returns>If the entity is visible or not.</returns>
+        public bool Visible
+        {
+            get; set;
         }
 
         /// <summary>
@@ -142,18 +147,15 @@ namespace MonoGameSceneGraph
                     {
                         // get curr position and update min / max
                         Vector3 currPosition = new Vector3(vertexData[i], vertexData[i + 1], vertexData[i + 2]);
+                        currPosition = Vector3.Transform(currPosition, worldTransformations);
                         min = Vector3.Min(min, currPosition);
                         max = Vector3.Max(max, currPosition);
                     }
                 }
             }
 
-            // transform min and max position so it will be in world space
-            min = Vector3.Transform(min, worldTransformations);
-            max = Vector3.Transform(max, worldTransformations);
-
-            // return the bounding box (in world space)
-            return new BoundingBox(Vector3.Min(min, max), Vector3.Max(min, max));
+            // return bounding box
+            return new BoundingBox(min, max);
         }
     }
 }
