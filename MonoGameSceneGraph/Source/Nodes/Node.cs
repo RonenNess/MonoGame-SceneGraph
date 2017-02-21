@@ -499,8 +499,6 @@ namespace MonoGameSceneGraph
                     BoundingBox curr = child.GetBoundingBox();
                     min = Vector3.Min(min, curr.Min);
                     max = Vector3.Max(max, curr.Max);
-                    min = Vector3.Min(min, curr.Max);
-                    max = Vector3.Max(max, curr.Min);
                 }
             }
 
@@ -510,8 +508,6 @@ namespace MonoGameSceneGraph
                 BoundingBox curr = entity.GetBoundingBox(this, _localTransform, _worldTransform);
                 min = Vector3.Min(min, curr.Min);
                 max = Vector3.Max(max, curr.Max);
-                min = Vector3.Min(min, curr.Max);
-                max = Vector3.Max(max, curr.Min);
             }
 
             // return final bounding box
