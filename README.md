@@ -216,3 +216,11 @@ MonoGame-SceneGraph is distributed with the permissive MIT License. For more inf
 - Added ```Find()``` to Nodes.
 - Made some functions virtual to make Node more easily extendable.
 - Fixed a bug when parent of a parent change transformations but middle parent don't.
+
+### 1.1.0.0
+
+- Improved general API and made Nodes and Entities more flexible and easier to extend.
+- Added mechanism to calculate and cache Nodes Bounding Box.
+- Added Culling Nodes to automatically cull by Bounding Box.
+- Note: this version changed some public member names and added members to Entity API - might require changes on your code to adjust.
+
