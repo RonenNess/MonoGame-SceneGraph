@@ -1,8 +1,8 @@
 # MonoGame-SceneGraph
-Simple Nodes &amp; Entities for scene graphs in MonoGame.
+Nodes, Culling &amp; Entities for basic Scene Graphs in MonoGame.
 
 ## What is it
-This mini-lib implements basic node and transformations required to implement a scene graphs in MonoGame.
+This lib implements basic Nodes, Transformations, and frustum-based culling required to implement a Scene Graphs in MonoGame.
 
 ### But what's a scene graph?
 

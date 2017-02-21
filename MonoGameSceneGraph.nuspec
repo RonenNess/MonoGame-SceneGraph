@@ -6,13 +6,14 @@
 	<authors>Ronen Ness</authors>
 	<owners>RonenNess</owners>
 	<title>MonoGame Scene Graph</title>
+	<summary>This lib implements basic Nodes, Transformations, and frustum-based culling required to implement a Scene Graphs in MonoGame.</summary>
 	<licenseUrl>https://en.wikipedia.org/wiki/MIT_License</licenseUrl>
 	<projectUrl>https://github.com/RonenNess/MonoGame-SceneGraph</projectUrl>
 	<iconUrl>https://raw.githubusercontent.com/RonenNess/MonoGame-SceneGraph/master/icon.png</iconUrl>
 	<requireLicenseAcceptance>false</requireLicenseAcceptance>
 	<releaseNotes>Added Culling Nodes and Bounding Boxes support + minor changes in APIs.</releaseNotes>
 	<description>Basic scene graph (node-based transformations) for 3D MonoGame projects.</description>
-	<tags>monogame scene graph gamedev nodes 3d animations</tags>
+	<tags>monogame scene graph gamedev nodes 3d culling animations</tags>
 	<dependencies>
 	</dependencies>
   </metadata>
