@@ -512,7 +512,6 @@ namespace MonoGameSceneGraph
                 max = Vector3.Max(max, curr.Max);
                 min = Vector3.Min(min, curr.Max);
                 max = Vector3.Max(max, curr.Min);
-
             }
 
             // return final bounding box

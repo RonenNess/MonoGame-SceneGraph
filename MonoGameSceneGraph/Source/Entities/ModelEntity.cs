@@ -152,8 +152,8 @@ namespace MonoGameSceneGraph
             min = Vector3.Transform(min, worldTransformations);
             max = Vector3.Transform(max, worldTransformations);
 
-            // return the bounding box
-            return new BoundingBox(min, max);
+            // return the bounding box (in world space)
+            return new BoundingBox(Vector3.Min(min, max), Vector3.Max(min, max));
         }
     }
 }
