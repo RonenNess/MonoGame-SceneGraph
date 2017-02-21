@@ -45,6 +45,11 @@ namespace MonoGameSceneGraph
         public object UserData;
 
         /// <summary>
+        /// Const return value for null bounding box.
+        /// </summary>
+        private static readonly BoundingBox EmptyBoundingBox = new BoundingBox();
+
+        /// <summary>
         /// The order in which we apply transformations when building the matrix for this node.
         /// </summary>
         protected TransformOrder _transformationsOrder = TransformOrder.ScaleRotationPosition;
@@ -486,12 +491,26 @@ namespace MonoGameSceneGraph
         }
 
         /// <summary>
+        /// Return true if this node is empty.
+        /// </summary>
+        public bool Empty
+        {
+            get { return _childEntities.Count == 0 && _childNodes.Count == 0; }
+        }
+
+        /// <summary>
         /// Get bounding box of this node and all its child nodes.
         /// </summary>
         /// <param name="includeChildNodes">If true, will include bounding box of child nodes. If false, only of entities directly attached to this node.</param>
         /// <returns>Bounding box of the node and its children.</returns>
         public virtual BoundingBox GetBoundingBox(bool includeChildNodes = true)
         {
+            // if empty skip
+            if (Empty)
+            {
+                return EmptyBoundingBox;
+            }
+
             // make sure transformations are up-to-date
             UpdateTransformations();
 
@@ -540,7 +559,7 @@ namespace MonoGameSceneGraph
             // nothing in this node?
             if (corners.Count == 0)
             {
-                return new BoundingBox();
+                return EmptyBoundingBox;
             }
 
             // return final bounding box

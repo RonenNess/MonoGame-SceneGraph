@@ -101,6 +101,12 @@ namespace MonoGameSceneGraph
         /// <param name="node">The child node that updated.</param>
         public override void OnChildWorldMatrixChange(Node node)
         {
+            // if node is empty do nothing, its not interesting
+            if (node.Empty)
+            {
+                return;
+            }
+
             // mark bounding box as needing update
             _isBoundingBoxDirty = true;
 
