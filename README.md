@@ -190,7 +190,7 @@ But in addition to creating and drawing them, you also need to set the camera bo
 MonoGameSceneGraph.CullingNode.CameraFrustum = cameraFrustum;
 ```
 
-Note that you can mix CullingNodes with regular Nodes without any problems. If you have internal parts that you don't want to check culling for, just make them plain Nodes. However, if you put them under a CullingNode and its culled out, they won't be rendered.
+Note that you can mix CullingNodes with regular Nodes, but make sure the plain nodes are only in edges and not between CullingNodes.
 
 #### Using CullingNodes Properly
 As mentioned above, a CullingNode bounding box is the combination of its own bounding box + all its children nodes and entities.

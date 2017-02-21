@@ -120,9 +120,6 @@ namespace MonoGameSceneGraph
         /// <returns>Bounding box of the entity.</returns>
         public BoundingBox GetBoundingBox(Node parent, Matrix localTransformations, Matrix worldTransformations)
         {
-            // apply model transformations on world transform (note: don't support animations)
-            worldTransformations = worldTransformations * Model.Bones[0].Transform;
-
             // initialize minimum and maximum corners of the bounding box to max and min values
             Vector3 min = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
             Vector3 max = new Vector3(float.MinValue, float.MinValue, float.MinValue);

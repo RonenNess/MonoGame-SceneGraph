@@ -29,8 +29,8 @@ namespace MonoGameSceneGraph
     /// For example, break the parent node into 4 nodes with 50x50 tiles each, and then break those nodes into 5x5 nodes with 10 tiles each. This way, the Culling Node will first test 4 large bounding box,
     /// with an actual chance of culling some of them. Then we'll have 25 bounding boxes to check per chunk, and some of them will cull out as well. For larger maps, just break into more chunks.
     /// 
-    /// Another thing you need to remember is that you can combine Culling Nodes with regular nodes. For example if you implemet particles or doodads (like grass) with lots of small nodes, sometimes its
-    /// enough to just test their parent node.
+    /// Another thing you need to remember is that you can combine Culling Nodes with regular nodes, but the regular nodes must be the edges (eg [culling_node] -> [plain_node] -> [culling_node] will not work properly). 
+    /// For example if you implemet particles or doodads (like grass) with lots of small nodes, sometimes its enough to just test their parent node.
     /// </remarks>
     public class CullingNode : Node
     {
@@ -43,21 +43,12 @@ namespace MonoGameSceneGraph
         /// <summary>
         /// Last calculated bounding box for this node.
         /// </summary>
-        protected BoundingBox _currBoundingBox;
+        protected BoundingBox _boundingBox;
 
         /// <summary>
-        /// Do we need to recalculate the bounding box of this node?
+        /// Do we need to update the bounding box?
         /// </summary>
         private bool _isBoundingBoxDirty = true;
-
-        /// <summary>
-        /// Called when the world matrix of this node is actually recalculated (invoked after the calculation).
-        /// </summary>
-        protected override void OnWorldMatrixChange()
-        {
-            base.OnWorldMatrixChange();
-            _isBoundingBoxDirty = true;
-        }
 
         /// <summary>
         /// Draw the node and its children.
@@ -80,15 +71,11 @@ namespace MonoGameSceneGraph
             // update transformations (only if needed, testing logic is inside)
             UpdateTransformations();
 
-            // check if need to recalculate bounding box
-            if (_isBoundingBoxDirty)
-            {
-                _currBoundingBox = GetBoundingBox(true);
-                _isBoundingBoxDirty = false;
-            }
+            // update bounding box (only if needed, testing logic is inside)
+            UpdateBoundingBox();
 
             // if this node is out of screen, don't draw it
-            if (CameraFrustum.Contains(_currBoundingBox) == ContainmentType.Disjoint)
+            if (CameraFrustum.Contains(_boundingBox) == ContainmentType.Disjoint)
             {
                 return;
             }
@@ -106,6 +93,66 @@ namespace MonoGameSceneGraph
             {
                 entity.Draw(this, _localTransform, _worldTransform);
             }
+        }
+
+        /// <summary>
+        /// Called every time one of the child nodes recalculate world transformations.
+        /// </summary>
+        /// <param name="node">The child node that updated.</param>
+        public override void OnChildWorldMatrixChange(Node node)
+        {
+            // mark bounding box as needing update
+            _isBoundingBoxDirty = true;
+
+            // pass message to parent, because it needs to update bounding box as well
+            if (_parent != null)
+            {
+                _parent.OnChildWorldMatrixChange(node);
+            }
+        }
+
+        /// <summary>
+        /// Get bounding box of this node and all its child nodes.
+        /// </summary>
+        /// <param name="includeChildNodes">If true, will include bounding box of child nodes. If false, only of entities directly attached to this node.</param>
+        /// <returns>Bounding box of the node and its children.</returns>
+        public override BoundingBox GetBoundingBox(bool includeChildNodes = true)
+        {
+            // update bounding box (note: only if needed, tested inside)
+            UpdateBoundingBox();
+
+            // return bounding box
+            return _boundingBox;
+        }
+
+        /// <summary>
+        /// Called when the world matrix of this node is actually recalculated (invoked after the calculation).
+        /// </summary>
+        protected override void OnWorldMatrixChange()
+        {
+            // call base function
+            base.OnWorldMatrixChange();
+
+            // set bounding box to dirty
+            _isBoundingBoxDirty = true;
+        }
+
+        /// <summary>
+        /// Update the bounding box of this Culling Node.
+        /// </summary>
+        protected void UpdateBoundingBox()
+        {
+            // if bounding box is not dirty, skip
+            if (!_isBoundingBoxDirty)
+            {
+                return;
+            }
+
+            // update bounding box
+            _boundingBox = base.GetBoundingBox(true);
+
+            // bounding box no longer dirty
+            _isBoundingBoxDirty = false;
         }
     }
 }

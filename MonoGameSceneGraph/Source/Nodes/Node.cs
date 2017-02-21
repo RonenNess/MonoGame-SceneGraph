@@ -237,7 +237,14 @@ namespace MonoGameSceneGraph
         /// </summary>
         protected virtual void OnWorldMatrixChange()
         {
+            // update transformations version
             _transformVersion++;
+            
+            // notify parent
+            if (_parent != null)
+            {
+                _parent.OnChildWorldMatrixChange(this);
+            }
         }
 
         /// <summary>
@@ -463,12 +470,23 @@ namespace MonoGameSceneGraph
         }
 
         /// <summary>
+        /// Called every time one of the child nodes recalculate world transformations.
+        /// </summary>
+        /// <param name="node">The child node that updated.</param>
+        public virtual void OnChildWorldMatrixChange(Node node)
+        {
+        }
+
+        /// <summary>
         /// Get bounding box of this node and all its child nodes.
         /// </summary>
         /// <param name="includeChildNodes">If true, will include bounding box of child nodes. If false, only of entities directly attached to this node.</param>
         /// <returns>Bounding box of the node and its children.</returns>
         public virtual BoundingBox GetBoundingBox(bool includeChildNodes = true)
         {
+            // make sure transformations are up-to-date
+            UpdateTransformations();
+
             // initialize minimum and maximum corners of the bounding box to max and min values
             Vector3 min = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
             Vector3 max = new Vector3(float.MinValue, float.MinValue, float.MinValue);
@@ -481,6 +499,8 @@ namespace MonoGameSceneGraph
                     BoundingBox curr = child.GetBoundingBox();
                     min = Vector3.Min(min, curr.Min);
                     max = Vector3.Max(max, curr.Max);
+                    min = Vector3.Min(min, curr.Max);
+                    max = Vector3.Max(max, curr.Min);
                 }
             }
 
@@ -490,6 +510,9 @@ namespace MonoGameSceneGraph
                 BoundingBox curr = entity.GetBoundingBox(this, _localTransform, _worldTransform);
                 min = Vector3.Min(min, curr.Min);
                 max = Vector3.Max(max, curr.Max);
+                min = Vector3.Min(min, curr.Max);
+                max = Vector3.Max(max, curr.Min);
+
             }
 
             // return final bounding box
