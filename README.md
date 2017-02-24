@@ -224,3 +224,6 @@ MonoGame-SceneGraph is distributed with the permissive MIT License. For more inf
 - Added Culling Nodes to automatically cull by Bounding Box.
 - Note: this version changed some public member names and added members to Entity API - might require changes on your code to adjust.
 
+### 1.1.0.1
+
+- Changed default build target to AnyCPU. No actual changes in code.

@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
   <metadata>
 	<id>MonoGame.SceneGraph</id>
-	<version>1.1.0.0</version>
+	<version>1.1.0.2</version>
 	<authors>Ronen Ness</authors>
 	<owners>RonenNess</owners>
 	<title>MonoGame Scene Graph</title>
@@ -11,7 +11,7 @@
 	<projectUrl>https://github.com/RonenNess/MonoGame-SceneGraph</projectUrl>
 	<iconUrl>https://raw.githubusercontent.com/RonenNess/MonoGame-SceneGraph/master/icon.png</iconUrl>
 	<requireLicenseAcceptance>false</requireLicenseAcceptance>
-	<releaseNotes>Added Culling Nodes and Bounding Boxes support + minor changes in APIs.</releaseNotes>
+	<releaseNotes>Changed build target to AnyCPU. There are no actual changes in code.</releaseNotes>
 	<description>Basic scene graph (node-based transformations) for 3D MonoGame projects.</description>
 	<tags>monogame scene graph gamedev nodes 3d culling animations</tags>
 	<dependencies>
@@ -19,6 +19,6 @@
   </metadata>
   <files>
 	<file src="readme.txt" target="" />
-	<file src="MonoGameSceneGraph\bin\DesktopGL\x86\Release\MonoGameSceneGraph.dll" target="lib\scenegraph\MonoGameSceneGraph.dll"/>
+	<file src="MonoGameSceneGraph\bin\Release\MonoGameSceneGraph.dll" target="lib\scenegraph\MonoGameSceneGraph.dll"/>
   </files>
 </package>
