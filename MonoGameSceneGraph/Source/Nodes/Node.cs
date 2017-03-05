@@ -337,6 +337,69 @@ namespace MonoGameSceneGraph
         }
 
         /// <summary>
+        /// Get position in world space.
+        /// </summary>
+        /// <remarks>Naive implementation using world matrix decompose. For better performance, override this with your own cached version.</remarks>
+        public virtual Vector3 WorldPosition
+        {
+            get
+            {
+                Vector3 pos; Vector3 scale; Quaternion rot;
+                WorldTransformations.Decompose(out scale, out rot, out pos);
+                return pos;
+            }
+        }
+
+        /// <summary>
+        /// Get Rotastion in world space.
+        /// </summary>
+        /// <remarks>Naive implementation using world matrix decompose. For better performance, override this with your own cached version.</remarks>
+        public virtual Quaternion WorldRotation
+        {
+            get
+            {
+                Vector3 pos; Vector3 scale; Quaternion rot;
+                WorldTransformations.Decompose(out scale, out rot, out pos);
+                return rot;
+            }
+        }
+
+        /// <summary>
+        /// Get Scale in world space.
+        /// </summary>
+        /// <remarks>Naive implementation using world matrix decompose. For better performance, override this with your own cached version.</remarks>
+        public virtual Vector3 WorldScale
+        {
+            get
+            {
+                Vector3 pos; Vector3 scale; Quaternion rot;
+                WorldTransformations.Decompose(out scale, out rot, out pos);
+                return scale;
+            }
+        }
+
+        /// <summary>
+        /// Force update transformations for this node and its children.
+        /// </summary>
+        public void ForceUpdate()
+        {
+            // not visible? skip
+            if (!Visible)
+            {
+                return;
+            }
+
+            // update transformations (only if needed, testing logic is inside)
+            UpdateTransformations();
+
+            // draw all child nodes
+            foreach (Node node in _childNodes)
+            {
+                node.ForceUpdate();
+            }
+        }
+
+        /// <summary>
         /// Reset all local transformations.
         /// </summary>
         public void ResetTransformations()
