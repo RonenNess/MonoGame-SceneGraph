@@ -209,6 +209,10 @@ In this doc we didn't cover much of the API, only the very basics needed to get 
 ## Lisence
 MonoGame-SceneGraph is distributed with the permissive MIT License. For more info, check out the ```LICENSE``` file in this repo.
 
+## Contact
+
+```ronenness@gmail.com```
+
 ## Changelog
 
 ### 1.0.0.1
@@ -227,3 +231,14 @@ MonoGame-SceneGraph is distributed with the permissive MIT License. For more inf
 ### 1.1.0.1
 
 - Changed default build target to AnyCPU. No actual changes in code.
+
+### 1.2.0.0
+
+- Added Clone() functions.
+- Added some callbacks you can register on nodes.
+- Moved the transformation order and rotation order into the Transformations class.
+- Added changeable rotation mode - Euler or Quaternion.
+- Some bug fixes in culling node when having a deep tree.
+- Extended API.
+- Optimizations for culling node.
+- Added LinkedNode - a node that copy transformations from external source, used to intigrate with physics engine.

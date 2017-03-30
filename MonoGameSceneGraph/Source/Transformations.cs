@@ -21,6 +21,22 @@ namespace MonoGameSceneGraph
     }
 
     /// <summary>
+    /// How to apply rotation (euler vs quaternion).
+    /// </summary>
+    public enum RotationType
+    {
+        /// <summary>
+        /// Euler rotation.
+        /// </summary>
+        Euler,
+
+        /// <summary>
+        /// Quaternion rotation.
+        /// </summary>
+        Quaternion,
+    }
+
+    /// <summary>
     /// Different way to build matrix from transformations.
     /// </summary>
     public enum TransformOrder
@@ -97,7 +113,6 @@ namespace MonoGameSceneGraph
     /// </summary>
     public class Transformations
     {
-
         /// <summary>
         /// Node position / translation.
         /// </summary>
@@ -112,6 +127,21 @@ namespace MonoGameSceneGraph
         /// Node scale.
         /// </summary>
         public Vector3 Scale;
+
+        /// <summary>
+        /// Order to apply different transformations to create the final matrix.
+        /// </summary>
+        public TransformOrder TransformOrder = TransformOrder.ScaleRotationPosition;
+
+        /// <summary>
+        /// Axis order to apply rotation.
+        /// </summary>
+        public RotationOrder RotationOrder = RotationOrder.RotateYXZ;
+
+        /// <summary>
+        /// What type of rotation to use.
+        /// </summary>
+        public RotationType RotationType = RotationType.Quaternion;
 
         /// <summary>
         /// Create new default transformations.
@@ -131,56 +161,113 @@ namespace MonoGameSceneGraph
             Position = other.Position;
             Rotation = other.Rotation;
             Scale = other.Scale;
+            TransformOrder = other.TransformOrder;
+            RotationOrder = other.RotationOrder;
+            RotationType = other.RotationType;
+        }
+
+        /// <summary>
+        /// Clone transformations.
+        /// </summary>
+        /// <returns>Copy of this transformations.</returns>
+        public Transformations Clone()
+        {
+            return new Transformations(this);
         }
 
         /// <summary>
         /// Build and return just the rotation matrix for this treansformations.
         /// </summary>
-        /// <param name="rotationOrder">In which order to apply rotation (axis order) when applying rotation.</param>
-        /// <returns></returns>
-        public Matrix BuildRotationMatrix(RotationOrder rotationOrder = RotationOrder.RotateYXZ)
+        /// <returns>Rotation matrix.</returns>
+        public Matrix BuildRotationMatrix()
         {
-            switch (rotationOrder)
+            // handle euler rotation
+            if (RotationType == RotationType.Euler)
             {
-                case RotationOrder.RotateXYZ:
-                    return Matrix.CreateRotationX(Rotation.X) * Matrix.CreateRotationY(Rotation.Y) * Matrix.CreateRotationZ(Rotation.Z);
+                switch (RotationOrder)
+                {
+                    case RotationOrder.RotateXYZ:
+                        return Matrix.CreateRotationX(Rotation.X) * Matrix.CreateRotationY(Rotation.Y) * Matrix.CreateRotationZ(Rotation.Z);
 
-                case RotationOrder.RotateXZY:
-                    return Matrix.CreateRotationX(Rotation.X) * Matrix.CreateRotationZ(Rotation.Z) * Matrix.CreateRotationY(Rotation.Y);
+                    case RotationOrder.RotateXZY:
+                        return Matrix.CreateRotationX(Rotation.X) * Matrix.CreateRotationZ(Rotation.Z) * Matrix.CreateRotationY(Rotation.Y);
 
-                case RotationOrder.RotateYXZ:
-                    return Matrix.CreateFromYawPitchRoll(Rotation.Y, Rotation.X, Rotation.Z);
+                    case RotationOrder.RotateYXZ:
+                        return Matrix.CreateFromYawPitchRoll(Rotation.Y, Rotation.X, Rotation.Z);
 
-                case RotationOrder.RotateYZX:
-                    return Matrix.CreateRotationY(Rotation.Y) * Matrix.CreateRotationZ(Rotation.Z) * Matrix.CreateRotationX(Rotation.X);
+                    case RotationOrder.RotateYZX:
+                        return Matrix.CreateRotationY(Rotation.Y) * Matrix.CreateRotationZ(Rotation.Z) * Matrix.CreateRotationX(Rotation.X);
 
-                case RotationOrder.RotateZXY:
-                    return Matrix.CreateRotationZ(Rotation.Z) * Matrix.CreateRotationX(Rotation.X) * Matrix.CreateRotationY(Rotation.Y);
+                    case RotationOrder.RotateZXY:
+                        return Matrix.CreateRotationZ(Rotation.Z) * Matrix.CreateRotationX(Rotation.X) * Matrix.CreateRotationY(Rotation.Y);
 
-                case RotationOrder.RotateZYX:
-                    return Matrix.CreateRotationZ(Rotation.Z) * Matrix.CreateRotationY(Rotation.Y) * Matrix.CreateRotationX(Rotation.X);
+                    case RotationOrder.RotateZYX:
+                        return Matrix.CreateRotationZ(Rotation.Z) * Matrix.CreateRotationY(Rotation.Y) * Matrix.CreateRotationX(Rotation.X);
 
-                default:
-                    throw new System.Exception("Unknown rotation order!");
+                    default:
+                        throw new System.Exception("Unknown rotation order!");
+                }
+            }
+            // handle quaternion rotation
+            else if (RotationType == RotationType.Quaternion)
+            {
+                // quaternion to use
+                Quaternion quat;
+
+                // build quaternion based on rotation order
+                switch (RotationOrder)
+                {
+                    case RotationOrder.RotateXYZ:
+                        quat = Quaternion.CreateFromAxisAngle(Vector3.UnitX, Rotation.X) * Quaternion.CreateFromAxisAngle(Vector3.UnitY, Rotation.Y) * Quaternion.CreateFromAxisAngle(Vector3.UnitZ, Rotation.Z);
+                        break;
+
+                    case RotationOrder.RotateXZY:
+                        quat = Quaternion.CreateFromAxisAngle(Vector3.UnitX, Rotation.X) * Quaternion.CreateFromAxisAngle(Vector3.UnitZ, Rotation.Z) * Quaternion.CreateFromAxisAngle(Vector3.UnitY, Rotation.Y);
+                        break;
+
+                    case RotationOrder.RotateYXZ:
+                        quat = Quaternion.CreateFromYawPitchRoll(Rotation.Y, Rotation.X, Rotation.Z);
+                        break;
+
+                    case RotationOrder.RotateYZX:
+                        quat = Quaternion.CreateFromAxisAngle(Vector3.UnitY, Rotation.Y) * Quaternion.CreateFromAxisAngle(Vector3.UnitZ, Rotation.Z) * Quaternion.CreateFromAxisAngle(Vector3.UnitX, Rotation.X);
+                        break;
+
+                    case RotationOrder.RotateZXY:
+                        quat = Quaternion.CreateFromAxisAngle(Vector3.UnitZ, Rotation.Z) * Quaternion.CreateFromAxisAngle(Vector3.UnitX, Rotation.X) * Quaternion.CreateFromAxisAngle(Vector3.UnitY, Rotation.Y);
+                        break;
+
+                    case RotationOrder.RotateZYX:
+                        quat = Quaternion.CreateFromAxisAngle(Vector3.UnitZ, Rotation.Z) * Quaternion.CreateFromAxisAngle(Vector3.UnitY, Rotation.Y) * Quaternion.CreateFromAxisAngle(Vector3.UnitX, Rotation.X);
+                        break;
+
+                    default:
+                        throw new System.Exception("Unknown rotation order!");
+                }
+
+                // convert to a matrix and return
+                return Matrix.CreateFromQuaternion(quat);
+            }
+            // should never happen.
+            else
+            {
+                throw new System.Exception("Unknown rotation type!");
             }
         }
 
         /// <summary>
         /// Build and return a matrix from current transformations.
         /// </summary>
-        /// <param name="transformOrder">In which order to apply transformations to produce final matrix.</param>
-        /// <param name="rotationOrder">In which order to apply rotation (axis order) when applying rotation.</param>
         /// <returns>Matrix with all transformations applied.</returns>
-        public Matrix BuildMatrix(TransformOrder transformOrder = TransformOrder.ScaleRotationPosition, 
-            RotationOrder rotationOrder = RotationOrder.RotateYXZ)
+        public Matrix BuildMatrix()
         {
             // create the matrix parts
             Matrix pos = Matrix.CreateTranslation(Position);
-            Matrix rot = BuildRotationMatrix(rotationOrder);
+            Matrix rot = BuildRotationMatrix();
             Matrix scale = Matrix.CreateScale(Scale);
 
             // build and return matrix based on order
-            switch (transformOrder)
+            switch (TransformOrder)
             {
                 case TransformOrder.PositionRotationScale:
                     return pos * rot * scale;

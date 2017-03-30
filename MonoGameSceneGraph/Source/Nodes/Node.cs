@@ -14,6 +14,12 @@ using System.Collections.Generic;
 namespace MonoGameSceneGraph
 {
     /// <summary>
+    /// A callback function you can register on different node-related events.
+    /// </summary>
+    /// <param name="node">The node instance the event came from.</param>
+    public delegate void NodeEventCallback(Node node);
+
+    /// <summary>
     /// A node with transformations, you can attach renderable entities to it, or append
     /// child nodes to inherit transformations.
     /// </summary>
@@ -23,6 +29,17 @@ namespace MonoGameSceneGraph
         /// Parent node.
         /// </summary>
         protected Node _parent = null;
+
+        /// <summary>
+        /// Callback that triggers every time a node updates its matrix.
+        /// </summary>
+        public static NodeEventCallback OnTransformationsUpdate;
+
+        /// <summary>
+        /// Callback that triggers every time a node is rendered.
+        /// Note: nodes that are culled out should not trigger this.
+        /// </summary>
+        public static NodeEventCallback OnDraw;
 
         /// <summary>
         /// Node's transformations.
@@ -48,16 +65,6 @@ namespace MonoGameSceneGraph
         /// Const return value for null bounding box.
         /// </summary>
         private static readonly BoundingBox EmptyBoundingBox = new BoundingBox();
-
-        /// <summary>
-        /// The order in which we apply transformations when building the matrix for this node.
-        /// </summary>
-        protected TransformOrder _transformationsOrder = TransformOrder.ScaleRotationPosition;
-
-        /// <summary>
-        /// The order in which we apply rotation when building the matrix for this node.
-        /// </summary>
-        protected RotationOrder _rotationOrder = RotationOrder.RotateYXZ;
 
         /// <summary>
         /// Local transformations matrix, eg the result of the current local transformations.
@@ -117,6 +124,18 @@ namespace MonoGameSceneGraph
         }
 
         /// <summary>
+        /// Clone this scene node.
+        /// </summary>
+        /// <returns>Node copy.</returns>
+        public virtual Node Clone()
+        {
+            Node ret = new Node();
+            ret._transformations = _transformations.Clone();
+            ret.Visible = Visible;
+            return ret;
+        }
+
+        /// <summary>
         /// Draw the node and its children.
         /// </summary>
         public virtual void Draw()
@@ -136,6 +155,9 @@ namespace MonoGameSceneGraph
                 node.Draw();
             }
 
+            // trigger draw event
+            OnDraw?.Invoke(this);
+
             // draw all child entities
             foreach (IEntity entity in _childEntities)
             {
@@ -150,6 +172,7 @@ namespace MonoGameSceneGraph
         public void AddEntity(IEntity entity)
         {
             _childEntities.Add(entity);
+            OnEntitiesListChange(entity, true);
         }
 
         /// <summary>
@@ -159,6 +182,25 @@ namespace MonoGameSceneGraph
         public void RemoveEntity(IEntity entity)
         {
             _childEntities.Remove(entity);
+            OnEntitiesListChange(entity, false);
+        }
+
+        /// <summary>
+        /// Called whenever a child node was added / removed from this node.
+        /// </summary>
+        /// <param name="entity">Entity that was added / removed.</param>
+        /// <param name="wasAdded">If true its an entity that was added, if false, an entity that was removed.</param>
+        virtual protected void OnEntitiesListChange(IEntity entity, bool wasAdded)
+        {
+        }
+
+        /// <summary>
+        /// Called whenever an entity was added / removed from this node.
+        /// </summary>
+        /// <param name="node">Node that was added / removed.</param>
+        /// <param name="wasAdded">If true its a node that was added, if false, a node that was removed.</param>
+        virtual protected void OnChildNodesListChange(Node node, bool wasAdded)
+        {
         }
 
         /// <summary>
@@ -178,6 +220,7 @@ namespace MonoGameSceneGraph
 
             // set self as node's parent
             node.SetParent(this);
+            OnChildNodesListChange(node, true);
         }
 
         /// <summary>
@@ -197,6 +240,7 @@ namespace MonoGameSceneGraph
 
             // clear node parent
             node.SetParent(null);
+            OnChildNodesListChange(node, false);
         }
 
         /// <summary>
@@ -252,7 +296,10 @@ namespace MonoGameSceneGraph
         {
             // update transformations version
             _transformVersion++;
-            
+
+            // trigger update event
+            OnTransformationsUpdate?.Invoke(this);
+
             // notify parent
             if (_parent != null)
             {
@@ -291,7 +338,7 @@ namespace MonoGameSceneGraph
             // if local transformations are dirty, we need to update them
             if (_isDirty)
             {
-                _localTransform = _transformations.BuildMatrix(_transformationsOrder, _rotationOrder);
+                _localTransform = _transformations.BuildMatrix();
             }
             
             // if local transformations are dirty, or parent transformations are out-of-date, update world transformations
@@ -344,9 +391,9 @@ namespace MonoGameSceneGraph
         {
             get
             {
-                Vector3 pos; Vector3 scale; Quaternion rot;
-                WorldTransformations.Decompose(out scale, out rot, out pos);
-                return pos;
+                //Vector3 pos; Vector3 scale; Quaternion rot;
+                //WorldTransformations.Decompose(out scale, out rot, out pos);
+                return WorldTransformations.Translation;
             }
         }
 
@@ -381,7 +428,8 @@ namespace MonoGameSceneGraph
         /// <summary>
         /// Force update transformations for this node and its children.
         /// </summary>
-        public void ForceUpdate()
+        /// <param name="recursive">If true, will also iterate and force-update children.</param>
+        public void ForceUpdate(bool recursive = true)
         {
             // not visible? skip
             if (!Visible)
@@ -392,10 +440,13 @@ namespace MonoGameSceneGraph
             // update transformations (only if needed, testing logic is inside)
             UpdateTransformations();
 
-            // draw all child nodes
-            foreach (Node node in _childNodes)
+            // force-update all child nodes
+            if (recursive)
             {
-                node.ForceUpdate();
+                foreach (Node node in _childNodes)
+                {
+                    node.ForceUpdate(recursive);
+                }
             }
         }
 
@@ -413,8 +464,17 @@ namespace MonoGameSceneGraph
         /// </summary>
         public TransformOrder TransformationsOrder
         {
-            get { return _transformationsOrder; }
-            set { _transformationsOrder = value;  OnTransformationsSet(); }
+            get { return _transformations.TransformOrder; }
+            set { _transformations.TransformOrder = value;  OnTransformationsSet(); }
+        }
+
+        /// <summary>
+        /// Get / Set the rotation type (euler / quaternion).
+        /// </summary>
+        public RotationType RotationType
+        {
+            get { return _transformations.RotationType; }
+            set { _transformations.RotationType = value; OnTransformationsSet(); }
         }
 
         /// <summary>
@@ -422,8 +482,8 @@ namespace MonoGameSceneGraph
         /// </summary>
         public RotationOrder RotationOrder
         {
-            get { return _rotationOrder; }
-            set { _rotationOrder = value; OnTransformationsSet(); }
+            get { return _transformations.RotationOrder; }
+            set { _transformations.RotationOrder = value; OnTransformationsSet(); }
         }
 
         /// <summary>
@@ -432,7 +492,7 @@ namespace MonoGameSceneGraph
         public Vector3 Position
         {
             get { return _transformations.Position; }
-            set { _transformations.Position = value; OnTransformationsSet(); }
+            set { if (_transformations.Position != value) OnTransformationsSet(); _transformations.Position = value; }
         }
 
         /// <summary>
@@ -441,7 +501,7 @@ namespace MonoGameSceneGraph
         public Vector3 Scale
         {
             get { return _transformations.Scale; }
-            set { _transformations.Scale = value; OnTransformationsSet(); }
+            set { if (_transformations.Scale != value) OnTransformationsSet(); _transformations.Scale = value; }
         }
 
         /// <summary>
@@ -450,7 +510,7 @@ namespace MonoGameSceneGraph
         public Vector3 Rotation
         {
             get { return _transformations.Rotation; }
-            set { _transformations.Rotation = value; OnTransformationsSet(); }
+            set { if (_transformations.Rotation != value) OnTransformationsSet(); _transformations.Rotation = value; }
         }
 
         /// <summary>
@@ -459,7 +519,7 @@ namespace MonoGameSceneGraph
         public float RotationX
         {
             get { return _transformations.Rotation.X; }
-            set { _transformations.Rotation.X = value; OnTransformationsSet(); }
+            set { if (_transformations.Rotation.X != value) OnTransformationsSet(); _transformations.Rotation.X = value; }
         }
 
         /// <summary>
@@ -468,7 +528,7 @@ namespace MonoGameSceneGraph
         public float RotationY
         {
             get { return _transformations.Rotation.Y; }
-            set { _transformations.Rotation.Y = value; OnTransformationsSet(); }
+            set { if (_transformations.Rotation.Y != value) OnTransformationsSet(); _transformations.Rotation.Y = value; }
         }
 
         /// <summary>
@@ -477,7 +537,7 @@ namespace MonoGameSceneGraph
         public float RotationZ
         {
             get { return _transformations.Rotation.Z; }
-            set { _transformations.Rotation.Z = value; OnTransformationsSet(); }
+            set { if (_transformations.Rotation.Z != value) OnTransformationsSet(); _transformations.Rotation.Z = value; }
         }
 
         /// <summary>
@@ -486,7 +546,7 @@ namespace MonoGameSceneGraph
         public float ScaleX
         {
             get { return _transformations.Scale.X; }
-            set { _transformations.Scale.X = value; OnTransformationsSet(); }
+            set { if (_transformations.Scale.X != value) OnTransformationsSet(); _transformations.Scale.X = value; }
         }
 
         /// <summary>
@@ -495,7 +555,7 @@ namespace MonoGameSceneGraph
         public float ScaleY
         {
             get { return _transformations.Scale.Y; }
-            set { _transformations.Scale.Y = value; OnTransformationsSet(); }
+            set { if (_transformations.Scale.Y != value) OnTransformationsSet(); _transformations.Scale.Y = value; }
         }
 
         /// <summary>
@@ -504,7 +564,7 @@ namespace MonoGameSceneGraph
         public float ScaleZ
         {
             get { return _transformations.Scale.Z; }
-            set { _transformations.Scale.Z = value; OnTransformationsSet(); }
+            set { if (_transformations.Scale.Z != value) OnTransformationsSet(); _transformations.Scale.Z = value; }
         }
 
 
@@ -514,7 +574,7 @@ namespace MonoGameSceneGraph
         public float PositionX
         {
             get { return _transformations.Position.X; }
-            set { _transformations.Position.X = value; OnTransformationsSet(); }
+            set { if (_transformations.Position.X != value) OnTransformationsSet(); _transformations.Position.X = value; }
         }
 
         /// <summary>
@@ -523,7 +583,7 @@ namespace MonoGameSceneGraph
         public float PositionY
         {
             get { return _transformations.Position.Y; }
-            set { _transformations.Position.Y = value; OnTransformationsSet(); }
+            set { if (_transformations.Position.Y != value) OnTransformationsSet(); _transformations.Position.Y = value; }
         }
 
         /// <summary>
@@ -532,7 +592,7 @@ namespace MonoGameSceneGraph
         public float PositionZ
         {
             get { return _transformations.Position.Z; }
-            set { _transformations.Position.Z = value; OnTransformationsSet(); }
+            set { if (_transformations.Position.Z != value) OnTransformationsSet(); _transformations.Position.Z = value; }
         }
 
         /// <summary>
@@ -559,6 +619,14 @@ namespace MonoGameSceneGraph
         public bool Empty
         {
             get { return _childEntities.Count == 0 && _childNodes.Count == 0; }
+        }
+
+        /// <summary>
+        /// Get if this node have any entities in it.
+        /// </summary>
+        public bool HaveEntities
+        {
+            get { return _childEntities.Count != 0; }
         }
 
         /// <summary>

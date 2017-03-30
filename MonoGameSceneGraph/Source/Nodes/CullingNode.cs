@@ -51,6 +51,18 @@ namespace MonoGameSceneGraph
         protected bool _isBoundingBoxDirty = true;
 
         /// <summary>
+        /// Clone this scene node.
+        /// </summary>
+        /// <returns>Node copy.</returns>
+        public override Node Clone()
+        {
+            CullingNode ret = new CullingNode();
+            ret._transformations = _transformations.Clone();
+            ret.Visible = Visible;
+            return ret;
+        }
+
+        /// <summary>
         /// Draw the node and its children.
         /// </summary>
         public override void Draw()
@@ -75,8 +87,13 @@ namespace MonoGameSceneGraph
             UpdateBoundingBox();
 
             // if this node is out of screen, don't draw it
-            if (CameraFrustum.Contains(_boundingBox) == ContainmentType.Disjoint)
+            if (!IsInScreen)
             {
+                // update all child nodes (otherwise they might get stuck outside of screen and never update bounding box).
+                foreach (Node node in _childNodes)
+                {
+                    node.ForceUpdate();
+                }
                 return;
             }
 
@@ -88,10 +105,35 @@ namespace MonoGameSceneGraph
                 node.Draw();
             }
 
+            // call draw callback
+            Node.OnDraw?.Invoke(this);
+
             // draw all child entities
             foreach (IEntity entity in _childEntities)
             {
                 entity.Draw(this, _localTransform, _worldTransform);
+            }
+        }
+
+        /// <summary>
+        /// Get if this node is currently visible in camera.
+        /// </summary>
+        public bool IsInScreen
+        {
+            get
+            {
+                return (CameraFrustum.Contains(_boundingBox) != ContainmentType.Disjoint);
+            }
+        }
+
+        /// <summary>
+        /// Get if this node is partly inside screen (eg intersects with camera frustum).
+        /// </summary>
+        public bool IsPartlyInScreen
+        {
+            get
+            {
+                return (CameraFrustum.Contains(_boundingBox) == ContainmentType.Intersects);
             }
         }
 
@@ -159,6 +201,26 @@ namespace MonoGameSceneGraph
 
             // bounding box no longer dirty
             _isBoundingBoxDirty = false;
+        }
+
+        /// <summary>
+        /// Called every time an entity was added / removed from this node.
+        /// </summary>
+        /// <param name="entity">Entity that was added / removed.</param>
+        /// <param name="wasAdded">If true its an entity that was added, if false, an entity that was removed.</param>
+        override protected void OnEntitiesListChange(IEntity entity, bool wasAdded)
+        {
+            _isBoundingBoxDirty = true;
+        }
+
+        /// <summary>
+        /// Called whenever an entity was added / removed from this node.
+        /// </summary>
+        /// <param name="node">Node that was added / removed.</param>
+        /// <param name="wasAdded">If true its a node that was added, if false, a node that was removed.</param>
+        override protected void OnChildNodesListChange(Node node, bool wasAdded)
+        {
+            _isBoundingBoxDirty = true;
         }
     }
 }
