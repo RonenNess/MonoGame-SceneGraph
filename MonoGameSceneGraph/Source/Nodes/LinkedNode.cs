@@ -9,7 +9,7 @@
 using Microsoft.Xna.Framework;
 using System.Collections.Generic;
 
-namespace GeonBit.Core.Graphics
+namespace MonoGameSceneGraph
 {
     /// <summary>
     /// An external transformations source we can attach to a LinkedNode to update its transformations.
@@ -34,8 +34,8 @@ namespace GeonBit.Core.Graphics
     }
 
     /// <summary>
-    /// A scene node designed to be integrated into GeonBit scene and receive updates from external source,
-    /// like physical body. This is the default node we use everywhere in the engine.
+    /// A scene node that can be linked to an external source and copy its transformations.
+    /// This node is useable to integrate with physics simulators.
     /// </summary>
     public class LinkedNode : CullingNode
     {

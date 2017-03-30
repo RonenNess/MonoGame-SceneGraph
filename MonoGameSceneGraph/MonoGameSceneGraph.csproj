@@ -73,6 +73,7 @@
     <Compile Include="Source\Entities\ModelEntity.cs" />
     <Compile Include="Source\Entities\IEntity.cs" />
     <Compile Include="Source\Nodes\CullingNode.cs" />
+    <Compile Include="Source\Nodes\LinkedNode.cs" />
     <Compile Include="Source\Nodes\Node.cs" />
     <Compile Include="Source\Transformations.cs" />
   </ItemGroup>

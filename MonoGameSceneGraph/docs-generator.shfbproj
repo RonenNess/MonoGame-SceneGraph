@@ -18,13 +18,13 @@
     <HtmlHelpName>Documentation</HtmlHelpName>
     <Language>en-US</Language>
     <DocumentationSources>
-      <DocumentationSource sourceFile="bin\DesktopGL\x86\Debug\MonoGameSceneGraph.XML" />
-<DocumentationSource sourceFile="bin\DesktopGL\x86\Debug\MonoGameSceneGraph.dll" /></DocumentationSources>
+      <DocumentationSource sourceFile="bin\Debug\MonoGameSceneGraph.dll" />
+<DocumentationSource sourceFile="bin\Debug\MonoGameSceneGraph.xml" /></DocumentationSources>
     <ApiFilter>
       <Filter entryType="Namespace" fullName="MonoGameSceneGraph" isExposed="True" xmlns="">
-  <Filter entryType="Class" fullName="MonoGameSceneGraph.Game1" filterName="Game1" isExposed="False" />
-  <Filter entryType="Class" fullName="MonoGameSceneGraph.Program" filterName="Program" isExposed="False" />
-</Filter>
+        <Filter entryType="Class" fullName="MonoGameSceneGraph.Game1" filterName="Game1" isExposed="False" />
+        <Filter entryType="Class" fullName="MonoGameSceneGraph.Program" filterName="Program" isExposed="False" />
+      </Filter>
     </ApiFilter>
     <VisibleItems>InheritedMembers, InheritedFrameworkMembers, Protected, ProtectedInternalAsProtected</VisibleItems>
   </PropertyGroup>
