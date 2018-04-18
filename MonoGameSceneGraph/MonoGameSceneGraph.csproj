@@ -7,7 +7,7 @@
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{235539D2-2263-48F3-9DE4-70AE5E335E07}</ProjectGuid>
-    <OutputType>WinExe</OutputType>
+    <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>MonoGameSceneGraph</RootNamespace>
     <AssemblyName>MonoGameSceneGraph</AssemblyName>

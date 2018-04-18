@@ -330,6 +330,22 @@ namespace MonoGameSceneGraph
         }
 
         /// <summary>
+        /// Return true if we need to update world transform due to parent change.
+        /// </summary>
+        private bool NeedUpdateDueToParentChange()
+        {
+            // no parent? if parent last transform version is not 0, it means we had a parent but now we don't. 
+            // still require update.
+            if (_parent == null)
+            {
+                return _parentLastTransformVersion != 0;
+            }
+
+            // check if parent is dirty, or if our last parent transform version mismatch parent current transform version
+            return (_parent._isDirty || _parentLastTransformVersion != _parent._transformVersion);
+        }
+
+        /// <summary>
         /// Calc final transformations for current frame.
         /// This uses an indicator to know if an update is needed, so no harm is done if you call it multiple times.
         /// </summary>
@@ -341,14 +357,19 @@ namespace MonoGameSceneGraph
                 _localTransform = _transformations.BuildMatrix();
             }
             
-            // if local transformations are dirty, or parent transformations are out-of-date, update world transformations
-            if (_isDirty || 
-                (_parent != null && _parentLastTransformVersion != _parent._transformVersion) ||
-                (_parent == null && _parentLastTransformVersion != 0))
+            // if local transformations are dirty or parent transformations are out-of-date, update world transformations
+            if (_isDirty || NeedUpdateDueToParentChange())
             {
                 // if we got parent, apply its transformations
                 if (_parent != null)
                 {
+                    // if parent need update, update it first
+                    if (_parent._isDirty)
+                    {
+                        _parent.UpdateTransformations();
+                    }
+
+                    // recalc world transform
                     _worldTransform = _localTransform * _parent._worldTransform;
                     _parentLastTransformVersion = _parent._transformVersion;
                 }
