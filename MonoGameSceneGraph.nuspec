@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
   <metadata>
 	<id>MonoGame.SceneGraph</id>
-	<version>1.2.0.0</version>
+	<version>1.2.0.1</version>
 	<authors>Ronen Ness</authors>
 	<owners>RonenNess</owners>
 	<title>MonoGame SceneGraph (GeonBit)</title>
@@ -11,7 +11,7 @@
 	<projectUrl>https://github.com/RonenNess/MonoGame-SceneGraph</projectUrl>
 	<iconUrl>https://raw.githubusercontent.com/RonenNess/MonoGame-SceneGraph/master/icon.png</iconUrl>
 	<requireLicenseAcceptance>false</requireLicenseAcceptance>
-	<releaseNotes>Extended API, new node type, better transformations and rotation types, and bug fixes.</releaseNotes>
+	<releaseNotes>Fixed an important bug.</releaseNotes>
 	<description>Basic scene graph (node-based transformations) for 3D MonoGame projects.</description>
 	<tags>monogame scene graph gamedev nodes 3d culling animations</tags>
 	<dependencies>

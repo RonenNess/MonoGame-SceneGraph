@@ -4,7 +4,7 @@ Nodes, Culling &amp; Entities for basic Scene Graphs in MonoGame.
 ## What is it
 This lib implements basic Nodes, Transformations, and frustum-based culling required to implement a Scene Graphs in MonoGame.
 
-### But what's a scene graph?
+### What's a scene graph?
 
 From [Wikipedia](https://en.wikipedia.org/wiki/Scene_graph):
 
@@ -242,3 +242,7 @@ MonoGame-SceneGraph is distributed with the permissive MIT License. For more inf
 - Extended API.
 - Optimizations for culling node.
 - Added LinkedNode - a node that copy transformations from external source, used to intigrate with physics engine.
+
+### 1.2.0.1
+
+- Fixed bug with child update not always getting the most up-to-date parent transformation, if parent didn't update itself.
